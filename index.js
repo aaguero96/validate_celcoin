@@ -20,8 +20,8 @@ const main = async () => {
   const { rows: databaseBuys } = await database.query(
     `SELECT * FROM ${table} WHERE date >= '${startDate}' AND date <= '${endDate}' ORDER BY date DESC`
   );
-  // const celcoinBuys = await readReport();
-  // const slackData = readSlack();
+  const celcoinBuys = await readReport();
+  const slackData = readSlack();
 
   const queriesToRegister = [];
   const duplicatedBuys = [];
@@ -30,12 +30,16 @@ const main = async () => {
     await database.query(`
       SELECT "celcoin_protocol" FROM "validate_celcoin_reverse_payments"
     `)
-  ).rows;
+  ).rows.map((e) => e["celcoin_protocol"]);
 
   const usedCelcoinBuy = [];
   // UPDATE total_amount from buys
   for (let i = 0; i < databaseBuys.length; i += 1) {
     const databaseBuy = databaseBuys[i];
+
+    if (databaseBuy["buy_id"] === "2faecb77-57fe-43b8-960e-03547ede41bd") {
+      console.log("teste");
+    }
 
     if (duplicatedBuys.includes(databaseBuy["buy_id"])) {
       continue;
@@ -100,9 +104,14 @@ const main = async () => {
 
       if (findReversePayment.length > 0) {
         if (
-          usedReversePaymentProtocol.some(
-            (e) => e === findReversePayment[0].protocol
-          )
+          usedReversePaymentProtocol.some((e) => {
+            for (let k = 0; k < findReversePayment.length; k += 1) {
+              if (Number(e) === findReversePayment[k].protocol) {
+                return true;
+              }
+              return false;
+            }
+          })
         ) {
           continue;
         }
@@ -180,9 +189,14 @@ const main = async () => {
 
     if (findReversePayment.length > 0) {
       if (
-        usedReversePaymentProtocol.some(
-          (e) => e === findReversePayment[0].protocol
-        )
+        usedReversePaymentProtocol.some((e) => {
+          for (let k = 0; k < findReversePayment.length; k += 1) {
+            if (Number(e) === findReversePayment[k].protocol) {
+              return true;
+            }
+            return false;
+          }
+        })
       ) {
         continue;
       }
@@ -290,6 +304,23 @@ const main = async () => {
   // TXT FILES
   registeredQueries(queriesToRegister);
   leftCelcoinBuys(finalCelcoinBuys.map((e) => Object.values(e).join(",")));
+
+  const databaseProtocols = (
+    await database.query(`
+      SELECT "celcoin_protocol" FROM "validate_celcoin_reverse_payments"
+    `)
+  ).rows;
+
+  const toInsertInDatabase = usedReversePaymentProtocol.filter(
+    (e) => !databaseProtocols.some((i) => e === i)
+  );
+
+  // for (let i = 0; i < toInsertInDatabase.length; i += 1) {
+  //   await database.query(
+  //     `INSERT INTO "validate_celcoin_reverse_payments" ("celcoin_protocol") VALUES ($1)`,
+  //     [toInsertInDatabase[i]]
+  //   );
+  // }
 
   await database.end();
 };
