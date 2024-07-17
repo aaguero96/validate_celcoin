@@ -9,8 +9,8 @@ const { registeredQueries } = require("./register-queries");
 const { queryOnDatabase } = require("./query-on-database");
 
 const table = "buys";
-const startDate = "2023-07-30 00:00:00";
-const endDate = "2024-07-11 23:59:59";
+const startDate = "2024-07-01 00:00:00";
+const endDate = "2024-07-15 23:59:59";
 
 // modificar a buying_history
 
@@ -36,10 +36,6 @@ const main = async () => {
   // UPDATE total_amount from buys
   for (let i = 0; i < databaseBuys.length; i += 1) {
     const databaseBuy = databaseBuys[i];
-
-    if (databaseBuy["buy_id"] === "2faecb77-57fe-43b8-960e-03547ede41bd") {
-      console.log("teste");
-    }
 
     if (duplicatedBuys.includes(databaseBuy["buy_id"])) {
       continue;
@@ -106,7 +102,7 @@ const main = async () => {
         if (
           usedReversePaymentProtocol.some((e) => {
             for (let k = 0; k < findReversePayment.length; k += 1) {
-              if (Number(e) === findReversePayment[k].protocol) {
+              if (Number(e) === Number(findReversePayment[k].protocol)) {
                 return true;
               }
               return false;
@@ -191,7 +187,7 @@ const main = async () => {
       if (
         usedReversePaymentProtocol.some((e) => {
           for (let k = 0; k < findReversePayment.length; k += 1) {
-            if (Number(e) === findReversePayment[k].protocol) {
+            if (Number(e) === Number(findReversePayment[k].protocol)) {
               return true;
             }
             return false;
@@ -315,12 +311,12 @@ const main = async () => {
     (e) => !databaseProtocols.some((i) => e === i)
   );
 
-  // for (let i = 0; i < toInsertInDatabase.length; i += 1) {
-  //   await database.query(
-  //     `INSERT INTO "validate_celcoin_reverse_payments" ("celcoin_protocol") VALUES ($1)`,
-  //     [toInsertInDatabase[i]]
-  //   );
-  // }
+  for (let i = 0; i < toInsertInDatabase.length; i += 1) {
+    await database.query(
+      `INSERT INTO "validate_celcoin_reverse_payments" ("celcoin_protocol") VALUES ($1)`,
+      [toInsertInDatabase[i]]
+    );
+  }
 
   await database.end();
 };
