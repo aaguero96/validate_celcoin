@@ -9,16 +9,15 @@ const { registeredQueries } = require("./register-queries");
 const { queryOnDatabase } = require("./query-on-database");
 
 const table = "buys";
-const startDate = "2024-07-01 00:00:00";
-const endDate = "2024-07-15 23:59:59";
+const startDate = "2024-07-07 03:00:00";
+const endDate = "2024-08-01 03:00:00";
 
 // modificar a buying_history
-
 const main = async () => {
   const database = await databaseConfig();
 
   const { rows: databaseBuys } = await database.query(
-    `SELECT * FROM ${table} WHERE date >= '${startDate}' AND date <= '${endDate}' ORDER BY date DESC`
+    `SELECT * FROM ${table} WHERE date >= '${startDate}' AND date <= '${endDate}' AND bank_provider='celcoin' ORDER BY date DESC`
   );
   const celcoinBuys = await readReport();
   const slackData = readSlack();
@@ -36,6 +35,10 @@ const main = async () => {
   // UPDATE total_amount from buys
   for (let i = 0; i < databaseBuys.length; i += 1) {
     const databaseBuy = databaseBuys[i];
+
+    // if (databaseBuy["buy_id"] === "32b9885d-b09d-4c08-be39-8bcad735b985") {
+    //   console.log("test");
+    // }
 
     if (duplicatedBuys.includes(databaseBuy["buy_id"])) {
       continue;
@@ -90,7 +93,7 @@ const main = async () => {
       }
 
       const findReversePayment = celcoinBuys.filter((e) => {
-        const validateDate = compareDates(e.date, databaseBuy["date"]);
+        const validateDate = compareDates(e.date, databaseBuy["date_br"]);
         const validateValue =
           e.value === Number(databaseBuy["total_amount"]) ||
           Number(databaseBuy["total_amount"]) === 0;
@@ -203,7 +206,7 @@ const main = async () => {
           user_id,
           total_amount,
           payment_mean,
-          date,
+          date_br,
           status,
           quantity
         ) VALUES(
@@ -250,7 +253,7 @@ const main = async () => {
           user_id,
           total_amount,
           payment_mean,
-          date,
+          date_br,
           status,
           quantity
         ) VALUES(
@@ -275,7 +278,7 @@ const main = async () => {
         user_id,
         total_amount,
         payment_mean,
-        date,
+        date_br,
         status,
         quantity
       ) VALUES(
