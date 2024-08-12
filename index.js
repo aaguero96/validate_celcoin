@@ -314,12 +314,12 @@ const main = async () => {
     (e) => !databaseProtocols.some((i) => e === i)
   );
 
-  for (let i = 0; i < toInsertInDatabase.length; i += 1) {
-    await database.query(
-      `INSERT INTO "validate_celcoin_reverse_payments" ("celcoin_protocol") VALUES ($1)`,
-      [toInsertInDatabase[i]]
-    );
-  }
+  // for (let i = 0; i < toInsertInDatabase.length; i += 1) {
+  //   await database.query(
+  //     `INSERT INTO "validate_celcoin_reverse_payments" ("celcoin_protocol") VALUES ($1)`,
+  //     [toInsertInDatabase[i]]
+  //   );
+  // }
 
   await database.end();
 };

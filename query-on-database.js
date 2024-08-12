@@ -1,5 +1,5 @@
 const queryOnDatabase = async (connect, query) => {
-  await connect.query(query);
+  // await connect.query(query);
 };
 
 module.exports = {
